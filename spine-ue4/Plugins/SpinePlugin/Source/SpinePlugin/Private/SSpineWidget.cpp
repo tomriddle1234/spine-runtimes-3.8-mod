@@ -36,6 +36,7 @@
 #include "Modules/ModuleManager.h"
 #include "Runtime/SlateRHIRenderer/Public/Interfaces/ISlateRHIRendererModule.h"
 #include "Rendering/DrawElements.h"
+#include "Rendering/RenderingCommon.h"
 #include "Slate/SlateVectorArtData.h"
 #include "Slate/SlateVectorArtInstanceData.h"
 #include "Slate/SMeshWidget.h"
@@ -64,7 +65,14 @@ void SSpineWidget::SetData(USpineWidget* Widget) {
 		skeleton->setToSetupPose();
 		skeleton->updateWorldTransform();
 		Vector<float> scratchBuffer;
-		skeleton->getBounds(this->boundsMin.X, this->boundsMin.Y, this->boundsSize.X, this->boundsSize.Y, scratchBuffer);
+		//skeleton->getBounds((float&)(this->boundsMin.X), (float&)this->boundsMin.Y, (float&)this->boundsSize.X, (float&)this->boundsSize.Y, scratchBuffer);
+
+		float x, y, w, h;
+		skeleton->getBounds(x, y, w, h, scratchBuffer);
+		boundsMin.X = x;
+		boundsMin.Y = y;
+		boundsSize.X = w;
+		boundsSize.Y = h;
 	}
 }
 
@@ -196,7 +204,10 @@ void SSpineWidget::Flush(int32 LayerId, FSlateWindowElementList& OutDrawElements
 	
 	self->renderData.VertexData.SetNumUninitialized(Vertices.Num());
 	FSlateVertex* vertexData = (FSlateVertex*)renderData.VertexData.GetData();
-	FVector2D offset = AllottedGeometry.AbsolutePosition;
+	//FVector2D offset = FVector2D (AllottedGeometry.AbsolutePosition.X, AllottedGeometry.AbsolutePosition.Y);
+
+	FVector2D offset = AllottedGeometry.GetAbsolutePositionAtCoordinates(FVector2D(0.0f, 0.0f));
+
 	FColor white = FColor(0xffffffff);
 
 	for (size_t i = 0; i < (size_t)Vertices.Num(); i++) {
